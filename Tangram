@@ -1,0 +1,128 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(TangramGame());
+
+class TangramGame extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tangram Game',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: TangramBoard(),
+    );
+  }
+}
+
+class TangramBoard extends StatefulWidget {
+  @override
+  _TangramBoardState createState() => _TangramBoardState();
+}
+
+class _TangramBoardState extends State<TangramBoard> {
+  List<TangramPiece> pieces = [];
+
+  @override
+  void initState() {
+    super.initState();
+    pieces = createPieces();
+  }
+
+  List<TangramPiece> createPieces() {
+    return [
+      TangramPiece(Colors.red, [ 
+        Offset(0, 0),
+        Offset(100, 0),
+        Offset(0, 100),
+      ]),
+      TangramPiece(Colors.green, [ 
+        Offset(100, 0),
+        Offset(200, 0),
+        Offset(150, 100),
+      ]),
+      TangramPiece(Colors.blue, [ 
+        Offset(0, 100),
+        Offset(100, 100),
+        Offset(0, 200),
+      ]),
+      TangramPiece(Colors.orange, [ 
+        Offset(100, 100),
+        Offset(200, 100),
+        Offset(100, 200),
+      ]),
+      TangramPiece(Colors.purple, [ 
+        Offset(200, 50),
+        Offset(300, 50),
+        Offset(200, 150),
+      ]),
+      TangramPiece(Colors.yellow, [ 
+        Offset(100, 200),
+        Offset(200, 200),
+        Offset(200, 300),
+        Offset(100, 300),
+      ]),
+      TangramPiece(Colors.amber, [ 
+        Offset(200, 200),
+        Offset(300, 200),
+        Offset(200, 300),
+        Offset(300, 300),
+      ]),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Tangram Game')),
+      body: Stack(
+        children: pieces.map((piece) {
+          return Positioned(
+            left: piece.position.dx,
+            top: piece.position.dy,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  piece.position += details.delta;
+                });
+              },
+              child: CustomPaint(
+                size: Size(100, 100),
+                painter: TangramPainter(piece),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class TangramPainter extends CustomPainter {
+  final TangramPiece piece;
+
+  TangramPainter(this.piece);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()..color = piece.color;
+    var path = Path();
+    path.moveTo(piece.points[0].dx, piece.points[0].dy);
+    for (var point in piece.points.skip(1)) {
+      path.lineTo(point.dx, point.dy);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class TangramPiece {
+  final Color color;
+  final List<Offset> points;
+  Offset position;
+
+  TangramPiece(this.color, this.points) : position = Offset.zero;
+}
